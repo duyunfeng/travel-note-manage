@@ -17,7 +17,7 @@ const router = require('./route/index')
 
 // 注册合并后的路由器
 for(let path in router) {
-    app.use(path, router[path]);
+    app.use(`/api${path}`, router[path]);
 }
 
 // 日志输出成功信息
