@@ -5,10 +5,12 @@ const app = express();
 const loginRouter = require('./login');
 const userRouter = require('./user');
 const personalRouter = require('./personal');
+const uploadRouter = require('./upload');
 const router = {
     '/login': loginRouter,
     '/user': userRouter,
-    '/personal': personalRouter
+    '/personal': personalRouter,
+    '/upload': uploadRouter
 }
 
 // 添加 body-parser 中间件

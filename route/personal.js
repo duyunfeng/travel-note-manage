@@ -1,14 +1,38 @@
 const express = require('express');
 const { getSearch, returnRes, getModel, handleDatabaseError } = require('../utils/utils');
+const { authMiddleware } = require('../utils/index');
 const router = express.Router();
 
-const Personal = getModel('personal')
-router.get('/getPersonal', (req, res) => {
-    console.log(1111)
+const Personal = getModel('personal');
+const User = getModel('user');
+router.get('/getPersonal', authMiddleware, (req, res) => {
     const { id } = req.query;
-    Personal.findOne({ id })
+    if(!id) {
+        returnRes(res, 400, '参数错误');
+        return;
+    }
+    Personal.findOne({ _id: id })
     .then(data=> {
-        returnRes(res, 200, 'Success', data)
+        if(!data) {
+            User.findOne({ _id: id })
+            .then(data=> {
+                Personal.create({
+                    name: data.name,
+                    userName: data.userName,
+                    sex: 'secret',
+                    id: data.id,
+                    birthday: '',
+                    avatar: '',
+                    desc: ''
+                }).then(data=> {
+                    returnRes(res, 200, 'Success', data)
+                })    
+            }, (err) => {
+                handleDatabaseError(res, err)
+            })
+        } else {
+            returnRes(res, 200, 'Success', data)
+        }
     }, (err) => {
         handleDatabaseError(res, err)
     })

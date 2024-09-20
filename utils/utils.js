@@ -1,5 +1,18 @@
 const mongoose = require('mongoose');
 const scheamList = require('../model/scheam')
+const crypto = require('crypto');
+
+const generateSecureToken = (length = 32) => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+  
+    for (let i = 0; i < length; i++) {
+      const randomIndex = crypto.randomInt(characters.length);
+      result += characters.charAt(randomIndex);
+    }
+  
+    return result;
+}
 const getModel = (name) => {
     if(scheamList[name]) {
         return mongoose.model(name, scheamList[name]);
@@ -20,13 +33,16 @@ const getSearch = (query) => {
     }
     return search;
 }
-const returnRes = (res, code, message, data) => {
+const returnRes = (res, code, message, data, token) => {
     resData = {
         code,
         message,
     }
     if(data) {
         resData.data = data;
+    }
+    if(token) {
+        resData.token = token;
     }
     res.status(code).json(resData);
 }
@@ -36,4 +52,4 @@ const handleDatabaseError = (res, err) => {
     returnRes(res, 500, '数据库错误');
 }
 
-module.exports = { getModel, getSearch, returnRes, handleDatabaseError }
+module.exports = { getModel, getSearch, returnRes, handleDatabaseError, generateSecureToken }

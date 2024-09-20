@@ -1,5 +1,6 @@
 const express = require('express');
 const { returnRes, getModel, handleDatabaseError } = require('../utils/utils');
+const { createToken } = require('../utils/index');
 const router = express.Router();
 
 const User = getModel('user')
@@ -8,11 +9,12 @@ router.post('/', (req, res) => {
     const {userName, password} = req.body;
     User.findOne({userName: userName})
     .then(user => {
+        const token = createToken(user.toObject());
         if(user) {
             if(user.password === password) {
                 if(user.status === 1) {
                     // 登录成功
-                    returnRes(res, code, '登录成功', user)
+                    returnRes(res, code, '登录成功', user, token)
                 } else {
                     code = 500;
                     returnRes(res, code, '用户未激活')
