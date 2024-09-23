@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const { authMiddleware } = require('./utils/index');
 const app = express();
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -9,7 +10,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT"); // 允许的方法
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
   );
   next();
 });
@@ -23,7 +24,10 @@ const router = require("./route/index");
 
 // 注册合并后的路由器
 for (let path in router) {
-  app.use(`/api${path}`, router[path]);
+  if(path === '/login') {
+    app.use(`/api${path}`, router[path]);
+  }
+  app.use(`/api${path}`, authMiddleware, router[path]);
 }
 
 // 日志输出成功信息

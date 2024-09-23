@@ -1,11 +1,11 @@
 const express = require('express');
-const { getSearch, returnRes, getModel, handleDatabaseError } = require('../utils/utils');
-const { authMiddleware } = require('../utils/index');
+const { returnRes, getModel, handleDatabaseError } = require('../utils/utils');
+
 const router = express.Router();
 
 const Personal = getModel('personal');
 const User = getModel('user');
-router.get('/getPersonal', authMiddleware, (req, res) => {
+router.get('/getPersonal', (req, res) => {
     const { id } = req.query;
     if(!id) {
         returnRes(res, 400, '参数错误');
