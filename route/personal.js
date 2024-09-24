@@ -1,40 +1,44 @@
 const express = require('express');
 const { returnRes, getModel, handleDatabaseError } = require('../utils/utils');
-
+const { data } = require('../data/global');
 const router = express.Router();
 
 const Personal = getModel('personal');
 const User = getModel('user');
 router.get('/getPersonal', (req, res) => {
-    const { id } = req.query;
-    if(!id) {
-        returnRes(res, 400, '参数错误');
-        return;
-    }
-    Personal.findOne({ _id: id })
-    .then(data=> {
-        if(!data) {
-            User.findOne({ _id: id })
-            .then(data=> {
-                Personal.create({
-                    name: data.name,
-                    userName: data.userName,
-                    sex: 'secret',
-                    id: data.id,
-                    birthday: '',
-                    avatar: '',
-                    desc: ''
-                }).then(data=> {
-                    returnRes(res, 200, 'Success', data)
-                })    
-            }, (err) => {
+    Personal.findOne({ _id: data.user._id })
+    .then(result=> {
+        console.log(result)
+        if(!result) {
+            Personal.create({
+                name: data.user.name,
+                userName: data.user.userName,
+                sex: 'secret',
+                id: data.user.id,
+                birthday: '',
+                avatar: '',
+                desc: '',
+                _id: data.user._id
+            }).then(data=> {
+                returnRes(res, 200, 'Success', data)
+            }).catch(err =>{
                 handleDatabaseError(res, err)
             })
         } else {
-            returnRes(res, 200, 'Success', data)
+            returnRes(res, 200, 'Success', result)
         }
-    }, (err) => {
-        handleDatabaseError(res, err)
+    })
+    .catch((err) => {
+        console.log(err)
+        handleDatabaseError(res, err);
+    });
+})
+
+router.put('/updatePersonal', (req, res) => {
+    const params = req.body;
+    Personal.updateOne({ _id: data.user._id }, params)
+    .then(()=> {
+        returnRes(res, 200, 'Success')
     })
     .catch((err) => {
         console.log(err)

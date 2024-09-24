@@ -1,5 +1,5 @@
 const express = require('express');
-const { returnRes, getModel, handleDatabaseError } = require('../utils/utils');
+const { returnRes, getModel, handleDatabaseError, generateSecureToken } = require('../utils/utils');
 const { createToken } = require('../utils/index');
 const globalData = require('../data/global');
 const router = express.Router();
@@ -10,11 +10,13 @@ router.post('/', (req, res) => {
     const {userName, password} = req.body;
     User.findOne({userName: userName})
     .then(user => {
-        const token = createToken(user.toObject());
+        const secretKey = generateSecureToken();
+        globalData.data.secretKey = secretKey;
         if(user) {
             if(user.password === password) {
                 if(user.status === 1) {
                     // 登录成功
+                    const token = createToken(user.toObject());
                     globalData.data.user = user;
                     globalData.data.token = token;
                     returnRes(res, code, '登录成功', user, token)

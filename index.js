@@ -1,11 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const path = require("path");
 const { authMiddleware } = require('./utils/index');
 const app = express();
 app.use(bodyParser.json());
+// 设置静态文件目录
+app.use('/avatar', express.static(path.join(__dirname, 'public/uploads/avatar')));
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
+  res.header("Access-Control-Allow-Origin", "http://localhost:8081");
   res.header("Access-Control-Allow-Credentials", true);
   res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT"); // 允许的方法
   res.header(
@@ -24,10 +27,11 @@ const router = require("./route/index");
 
 // 注册合并后的路由器
 for (let path in router) {
-  if(path === '/login') {
+  if(['/login', '/getFile'].includes(path)) {
     app.use(`/api${path}`, router[path]);
+  } else {
+    app.use(`/api${path}`, authMiddleware, router[path]);
   }
-  app.use(`/api${path}`, authMiddleware, router[path]);
 }
 
 // 日志输出成功信息

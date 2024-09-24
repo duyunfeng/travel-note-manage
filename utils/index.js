@@ -13,4 +13,4 @@ const authMiddleware = jwtMiddleware.expressjwt({
   algorithms: ["HS256"],
 });
 
-module.exports = { secretKey, createToken, authMiddleware }
+module.exports = { createToken, authMiddleware }
