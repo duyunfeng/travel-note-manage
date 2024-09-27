@@ -7,12 +7,14 @@ const userRouter = require('./user');
 const personalRouter = require('./personal');
 const uploadRouter = require('./upload');
 const getFileRouter = require('./getFile');
+const resourceRouter = require('./resources');
 const router = {
     '/login': loginRouter,
     '/user': userRouter,
     '/personal': personalRouter,
     '/upload': uploadRouter,
-    '/getFile': getFileRouter
+    '/getFile': getFileRouter,
+    '/resource': resourceRouter
 }
 
 // 添加 body-parser 中间件

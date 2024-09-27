@@ -20,6 +20,26 @@ const scheamList = {
         'birthday': String,
         'avatar': String,
         'desc': String
+    }),
+    'article': new Scheam({
+        'title': String,
+        'content': String,
+        'createTime': Number,
+        'updateTime': Number,
+        'id': String,
+        'desc': String
+    }),
+    'resource': new Scheam({
+        'name': String,
+        'type': String,
+        'city': String,
+        'desc': String,
+        'img': String,
+        'content': String,
+        'articleId': String,
+        'createTime': Number,
+        'updateTime': Number,
+        'id': String
     })
 }
 

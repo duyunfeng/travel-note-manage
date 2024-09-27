@@ -1,16 +1,18 @@
 const express = require('express');
 const { getSearch, returnRes, getModel, handleDatabaseError } = require('../utils/utils');
+const { getNextIdFromFile } = require('../utils/file');
 const router = express.Router();
 
 const User = getModel('user')
+// 使用示例
+const idFile = './userId.txt';
 const getId = async () => {
-    const result = await User.find({});
-    let id = '';
-    if(result.length < 10) {
-        return id = `tn00000${result.length + 1}`
+    let id = getNextIdFromFile(idFile) 
+    if(id < 10) {
+        return id = `tn00000${id}`
     }
     if(result.length < 100) {
-        return id = `tn0000${result.length + 1}`
+        return id = `tn0000${id}`
     }
     return id; 
 }

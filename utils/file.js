@@ -17,5 +17,18 @@ const createFolder = (folder) => {
     }
     return control[type](fileName);
   }
-
-  module.exports = { createFolder, fileControl };
+ 
+const getNextIdFromFile = (filePath) => {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    const id = Number(data);
+    const nextId = id + 1;
+    fs.writeFileSync(filePath, nextId.toString());
+    return nextId;
+  } catch (error) {
+    // 处理错误，比如文件不存在，权限问题等
+    fs.writeFileSync(filePath, '1'); // 初始化ID
+    return 1;
+  }
+}
+module.exports = { createFolder, fileControl, getNextIdFromFile };
