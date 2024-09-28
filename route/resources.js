@@ -5,38 +5,26 @@ const { data } = require('../data/global');
 const router = express.Router();
 
 const resource = getModel('resource');
-const article = getModel('article');
 const resourceId = './resources.txt'
-const articleParam = {
-    'title': '',
-    'content': '',
-    'createTime': new Date().getTime(),
-    'updateTime': new Date().getTime(),
-    'id': getNextIdFromFile(resourceId),
-    'desc': ''
-}
 router.post('/createResource', (req, res)=> {
     const params = req.body;
-    console.log(params)
     resource.findOne({ name: params.name , type: params.type }).then(
         (result) => {
             if(result) {
                 returnRes(res, 400, '资源已存在')
             } else {
-                article.create(articleParam).then(
-                    (result) => {
-                        params.articleId = result._id;
-                        params.createTime = result.createTime;
-                        params.updateTime = result.updateTime;
-                        params.creater = data.user.userName;
-                        resource.create(params).then(data=> {
-                            returnRes(res, 200, 'Success', data)
-                        }).catch(err =>{
-                            handleDatabaseError(res, err)
-                        })
-                    }
-                )
-            }
+                    params.articleId = '';
+                    params.createTime = new Date().getTime();
+                    params.updateTime = new Date().getTime();
+                    params.creater = data.user.userName;
+                    params.id = `${params.type}${getNextIdFromFile(resourceId)}`;
+                    console.log(params)
+                    resource.create(params).then(data=> {
+                        returnRes(res, 200, 'Success', data)
+                    }).catch(err =>{
+                        handleDatabaseError(res, err)
+                    })
+                } 
         },
         (err) => {
             console.log(err)
@@ -45,8 +33,14 @@ router.post('/createResource', (req, res)=> {
     )
 })
 router.get('/getResource', (req, res) => {
-    const type = req.query.type;
-    resource.find({ type })
+    const query = req.query;
+    let params = {}
+    for(let key in query) {
+        if(query[key] !== '') {
+            params[key] = query[key]
+        }
+    }
+    resource.find(params)
     .then(result=> {
         console.log(result)
         if(!result) {
@@ -61,9 +55,9 @@ router.get('/getResource', (req, res) => {
     });
 })
 
-router.put('/updatePersonal', (req, res) => {
+router.put('/updateResource', (req, res) => {
     const params = req.body;
-    Personal.updateOne({ _id: data.user._id }, params)
+    resource.findOneAndUpdate( {id: params.id }, params)
     .then(()=> {
         returnRes(res, 200, 'Success')
     })

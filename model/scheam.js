@@ -39,7 +39,8 @@ const scheamList = {
         'articleId': String,
         'createTime': Number,
         'updateTime': Number,
-        'id': String
+        'id': String,
+        'creater': String
     })
 }
 

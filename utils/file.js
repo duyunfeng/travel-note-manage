@@ -1,4 +1,6 @@
 const fs = require('fs');
+const iconv = require('iconv-lite');
+const XLSX = require('xlsx');
 const globalData = require('../data/global');
 const { data } = globalData;
 const createFolder = (folder) => {
@@ -31,4 +33,33 @@ const getNextIdFromFile = (filePath) => {
     return 1;
   }
 }
-module.exports = { createFolder, fileControl, getNextIdFromFile };
+const readXLSXFile = (filePath) => {
+  const workbook = XLSX.readFile(filePath);
+  const sheetNameList = workbook.SheetNames;
+  const data = [];
+
+  // 遍历每个工作表
+  for (let i = 0; i < sheetNameList.length; i++) {
+    const worksheet = workbook.Sheets[sheetNameList[i]];
+    const sheetData = XLSX.utils.sheet_to_json(worksheet);
+    console.log(sheetData)
+    const result = sheetData.map(item => {
+      console.log(item)
+      const params = {};
+      for(let key in item) {
+        console.log(key)
+        params[iconv.decode(key, 'GB2312')] = iconv.decode(item[key], 'GB2312');
+      }
+      return params;
+    });
+    console.log(result)
+    
+
+    // 将每个工作表的数据添加到data数组中
+    data.push(...result);
+  }
+
+  return data;
+}
+
+module.exports = { createFolder, fileControl, getNextIdFromFile, readXLSXFile };

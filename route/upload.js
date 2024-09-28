@@ -2,18 +2,20 @@
 const express = require('express');
 const multer = require('multer');
 const iconv = require('iconv-lite');
+const fs = require('fs');
 const { returnRes, getModel } = require('../utils/utils');
 const globalData = require('../data/global');
 const router = express.Router();
 const { data } = globalData;
-const { fileControl, createFolder } = require('../utils/file');
+const { fileControl, createFolder, readXLSXFile  } = require('../utils/file');
 const personal = getModel('personal')
 const resource = getModel('resource')
 // 设置存储配置
 const storage = (url) => {
   const options = {
     '/':  'public/uploads/avatar',
-    '/resource': `public/uploads/resource`
+    '/resource': `public/uploads/resource`,
+    '/mulResource': `public/static`,
   }
   let urlResult = options[url];
   return multer.diskStorage({
@@ -46,6 +48,7 @@ const getUpload = (url) => {
 }
 const upload = getUpload('/');
 const uploadResource = getUpload('/resource');
+const uploadFile = getUpload('/mulResource')
 // upload.single('image'), 
 // 上传单个文件
 router.post('/', upload.single('image'), (req, res) => {
@@ -54,7 +57,7 @@ router.post('/', upload.single('image'), (req, res) => {
     returnRes(res, 400, '没有文件上传');
   }
   const fileName = fileControl(`public/uploads/avatar/${data?.user?.userName}`, 'findImage', file.originalname.split('.')[0]);
-  const filePath = `/uploads/avatar/${data?.user?.userName}/${fileName}`;
+  const filePath = `/public/uploads/avatar/${data?.user?.userName}/${fileName}`;
   personal.findByIdAndUpdate(data.user._id, { avatar: filePath }, { new: true })
   .then((result) => {
     console.log(result);
@@ -69,8 +72,38 @@ router.post('/resource', uploadResource.single('image'), (req, res) => {
     returnRes(res, 400, '没有文件上传');
   }
   const fileName = fileControl('public/uploads/resource', 'findImage', iconv.decode(file.originalname.split('.')[0], 'utf-8'));
-  const filePath = `/uploads/resource/${fileName}`;
+  const filePath = `/public/uploads/resource/${fileName}`;
   returnRes(res, 200, '上传成功', filePath);
 });
+
+router.post('/mulResource', uploadFile.single('file'), (req, res) => {
+  const file = req.file;
+  if (!file) {
+    returnRes(res, 400, '没有文件上传');
+  }
+  console.log(file.path)
+  const data = readXLSXFile(file.path);
+  console.log(data)
+  fs.unlink(file.path, (err) => {
+    if (err) {
+        console.error('Error deleting file:', err);
+    }
+
+    console.log('File processed and deleted successfully' );
+});
+  // storeData(data);
+  returnRes(res, 200, '上传成功');
+  // returnRes(res, 200, '上传成功', file.path);
+} )
+
+const storeData = (data) => {
+  console.log("存储的数据：", data);
+  // 这里可以将数据存储到数据库中
+  resource.create(data).then(result => {
+    console.log("存储成功：", result);
+  }).catch(err => {
+    console.log("存储失败：", err);
+  })
+}
 
 module.exports = router;
