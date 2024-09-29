@@ -4,10 +4,9 @@ const { getNextIdFromFile } = require('../utils/file');
 const router = express.Router();
 
 const User = getModel('user')
-// 使用示例
-const idFile = './userId.txt';
+
 const getId = async () => {
-    let id = getNextIdFromFile(idFile) 
+    let id = getNextIdFromFile('./id.txt', 'userId') 
     if(id < 10) {
         return id = `tn00000${id}`
     }

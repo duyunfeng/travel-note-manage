@@ -1,6 +1,7 @@
 
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const iconv = require('iconv-lite');
 const fs = require('fs');
 const { returnRes, getModel } = require('../utils/utils');
@@ -78,6 +79,7 @@ router.post('/resource', uploadResource.single('image'), (req, res) => {
 
 router.post('/mulResource', uploadFile.single('file'), (req, res) => {
   const file = req.file;
+  console.log(file)
   if (!file) {
     returnRes(res, 400, '没有文件上传');
   }

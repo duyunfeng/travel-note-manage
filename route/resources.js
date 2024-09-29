@@ -5,7 +5,6 @@ const { data } = require('../data/global');
 const router = express.Router();
 
 const resource = getModel('resource');
-const resourceId = './resources.txt'
 router.post('/createResource', (req, res)=> {
     const params = req.body;
     resource.findOne({ name: params.name , type: params.type }).then(
@@ -13,18 +12,19 @@ router.post('/createResource', (req, res)=> {
             if(result) {
                 returnRes(res, 400, '资源已存在')
             } else {
-                    params.articleId = '';
-                    params.createTime = new Date().getTime();
-                    params.updateTime = new Date().getTime();
-                    params.creater = data.user.userName;
-                    params.id = `${params.type}${getNextIdFromFile(resourceId)}`;
-                    console.log(params)
-                    resource.create(params).then(data=> {
-                        returnRes(res, 200, 'Success', data)
-                    }).catch(err =>{
-                        handleDatabaseError(res, err)
-                    })
-                } 
+                console.log(data);
+                params.articleId = '';
+                params.createTime = new Date().getTime();
+                params.updateTime = new Date().getTime();
+                params.creater = data.user.userName;
+                params.id = `${params.type}${getNextIdFromFile('./id.txt', 'resourcesId')}`;
+                console.log(params)
+                resource.create(params).then(data=> {
+                    returnRes(res, 200, 'Success', data)
+                }).catch(err =>{
+                    handleDatabaseError(res, err)
+                })
+            } 
         },
         (err) => {
             console.log(err)
@@ -42,7 +42,6 @@ router.get('/getResource', (req, res) => {
     }
     resource.find(params)
     .then(result=> {
-        console.log(result)
         if(!result) {
             returnRes(res, 400, '资源不存在')
         } else {

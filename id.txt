@@ -1,0 +1,4 @@
+userId 4
+resourcesId 3
+articleId 1
+logId 0

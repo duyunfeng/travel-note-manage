@@ -41,6 +41,14 @@ const scheamList = {
         'updateTime': Number,
         'id': String,
         'creater': String
+    }),
+    'log': new Scheam({
+        'type': String,
+        'content': String,
+        'time': Number,
+        'op': String,
+        'id': String,
+        'creater': String
     })
 }
 
