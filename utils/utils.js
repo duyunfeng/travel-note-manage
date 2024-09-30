@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const scheamList = require('../model/scheam')
 const crypto = require('crypto');
-
 const generateSecureToken = (length = 32) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -39,6 +38,7 @@ const returnRes = (res, code, message, data, token) => {
         message,
     }
     if(data) {
+        resData.total = data.length;
         resData.data = data;
     }
     if(token) {

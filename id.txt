@@ -1,4 +1,5 @@
-userId 4
-resourcesId 3
-articleId 1
+userId 3
+fooId 3
+siteId 1
+articleId 0
 logId 0
