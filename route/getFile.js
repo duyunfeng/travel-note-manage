@@ -5,7 +5,8 @@ const { fileControl } = require('../utils/file');
 const router = express.Router();
 const { data } = globalData;
 router.get('/:name', (req, res) => {
-    const file = fileControl('findImage', req.params.name);
+  const params = req.query;
+    const file = fileControl('findImage', params.name);
     if(!file) {
       returnRes(res, 400, '文件不存在')
     }

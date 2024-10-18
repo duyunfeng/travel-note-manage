@@ -17,29 +17,33 @@ const storage = (url) => {
     '/':  'public/uploads/avatar',
     '/resource': `public/uploads/resource`,
     '/mulResource': `public/static`,
+    '/articlesImage': 'public/uploads/article'
   }
   let urlResult = options[url];
   return multer.diskStorage({
     destination: function (req, file, cb) {
-      if(url === '/') {
+      if(['/', '/articlesImage'].includes(url)) {
         urlResult = options[url] + `/${data?.user?.userName}`;
       }
       createFolder(urlResult);
       cb(null, urlResult) // 确保这个文件夹已经存在
     },
     filename: function (req, file, cb) {
-      if(url === '/') {
+      if(['/', '/articlesImage'].includes(url)) {
         urlResult = options[url] + `/${data?.user?.userName}`;
       }
       const name =iconv.decode(file.originalname.split('.')[0], 'utf-8');
-      console.log(name)
       const ext = file.originalname.split('.')[1];
-      if(fileControl(urlResult, 'isExit', name)) {
-        // 文件名重复
-        returnRes(req.res, 400, `文件名已存在: ${name}`);
-        cb(new Error('文件名已存在'), null);
+      if(url === '/articlesImage') {
+        cb(null, `${name}-${new Date().getTime()}.${ext}`)
+      } else {
+        if(fileControl(urlResult, 'isExit', name)) {
+          // 文件名重复
+          returnRes(req.res, 400, `文件名已存在: ${name}`);
+          cb(new Error('文件名已存在'), null);
+        }
+        cb(null, `${name}.${ext}`)
       }
-      cb(null, `${name}.${ext}`)
     }
   })
 }
@@ -50,6 +54,7 @@ const getUpload = (url) => {
 const upload = getUpload('/');
 const uploadResource = getUpload('/resource');
 const uploadFile = getUpload('/mulResource')
+const uploadArticlesImage = getUpload('/articlesImage');
 // upload.single('image'), 
 // 上传单个文件
 router.post('/', upload.single('image'), (req, res) => {
@@ -57,16 +62,31 @@ router.post('/', upload.single('image'), (req, res) => {
   if (!file) {
     returnRes(res, 400, '没有文件上传');
   }
-  const fileName = fileControl(`public/uploads/avatar/${data?.user?.userName}`, 'findImage', file.originalname.split('.')[0]);
+  const fileName = fileControl(`public/uploads/avatar/${data?.user?.userName}`, 'findImage', iconv.decode(file.originalname.split('.')[0], 'utf-8'));
   const filePath = `/public/uploads/avatar/${data?.user?.userName}/${fileName}`;
   personal.findByIdAndUpdate(data.user._id, { avatar: filePath }, { new: true })
   .then((result) => {
-    console.log(result);
     returnRes(res, 200, '上传成功', result);
   }).catch(err => {
-    console.log(err);
   })
 });
+router.post('/articlesImage', uploadArticlesImage.single('image'), (req, res) => {
+  const file = req.file;
+  if (!file) {
+    returnRes(res, 400, '没有文件上传');
+  }
+  const filePath = `/public/uploads/article/${data?.user?.userName}/${file.filename}`;
+  const result = {
+    "errno": 0, // 注意：值是数字，不能是字符串
+    "data": {
+      "url": filePath, // 图片 src ，必须
+      "alt": "yyy", // 图片描述文字，非必须
+      "href": "zzz" // 图片的链接，非必须
+    }
+  }
+  returnRes(res, 200, '上传成功', result);
+});
+
 router.post('/resource', uploadResource.single('image'), (req, res) => {
   const file = req.file;
   if (!file) {
@@ -79,13 +99,10 @@ router.post('/resource', uploadResource.single('image'), (req, res) => {
 
 router.post('/mulResource', uploadFile.single('file'), (req, res) => {
   const file = req.file;
-  console.log(file)
   if (!file) {
     returnRes(res, 400, '没有文件上传');
   }
-  console.log(file.path)
   const data = readXLSXFile(file.path);
-  console.log(data)
   fs.unlink(file.path, (err) => {
     if (err) {
         console.error('Error deleting file:', err);

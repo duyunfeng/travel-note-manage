@@ -27,7 +27,12 @@ const scheamList = {
         'createTime': Number,
         'updateTime': Number,
         'id': String,
-        'desc': String
+        'desc': String,
+        'name': String,
+        'creater': String,
+        'status': Number,
+        'auditDesc': String,
+
     }),
     'resource': new Scheam({
         'name': String,

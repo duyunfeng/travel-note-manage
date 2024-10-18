@@ -10,6 +10,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "http://localhost:8081");
   res.header("Access-Control-Allow-Credentials", true);
+  res.header("Access-Control-Max-Age", 86400)
   res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT"); // 允许的方法
   res.header(
     "Access-Control-Allow-Headers",
@@ -31,6 +32,15 @@ for (let path in router) {
     app.use(`/api${path}`, router[path]);
   } else {
     app.use(`/api${path}`, authMiddleware, router[path]);
+    // 错误处理中间件
+    app.use((err, req, res, next) => {
+      if (err.name === 'UnauthorizedError') {
+        // 处理 JWT 认证失败的情况
+        res.status(401).send({ message: '登录超时', code: 401 });
+      } else {
+        next(err);
+      }
+    });
   }
 }
 

@@ -19,7 +19,7 @@ router.post('/', (req, res) => {
                     const token = createToken(user.toObject());
                     globalData.data.user = user;
                     globalData.data.token = token;
-                    returnRes(res, code, '登录成功', user, token)
+                    returnRes(res, code, '登录成功', {result: user}, token)
                 } else {
                     code = 500;
                     returnRes(res, code, '用户未激活')

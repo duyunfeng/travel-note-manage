@@ -1,5 +1,5 @@
 const express = require('express');
-const { getSearch, returnRes, getModel, handleDatabaseError } = require('../utils/utils');
+const { getSearch, returnRes, getModel, handleDatabaseError, getPage } = require('../utils/utils');
 const { getNextIdFromFile } = require('../utils/file');
 const router = express.Router();
 
@@ -19,10 +19,12 @@ const getId = async () => {
 // 获取用户信息
 router.get('/', (req, res) => {
     let code = 200;
-    const search = getSearch(req.query);
+    const params = req.query;
+    const search = getSearch(params);
     User.find(search)
-        .then((data) => {
-            returnRes(res, code, 'Success', data);
+        .then((result) => {
+            const dataResult = getPage(req.query.page, req.query.pageSize, result )
+            returnRes(res, code, 'Success', dataResult);
         })
         .catch((err) => {
             handleDatabaseError(res, err);
@@ -40,7 +42,6 @@ router.post('/creatUser', async (req, res) => {
     } else {
         const existingUserName = await User.findOne({ userName: userName });
         const existingName = await User.findOne({ name: name });
-
         if (existingUserName) {
             code = 500;
             returnRes(res, code, '用户已存在');
@@ -74,9 +75,9 @@ router.post('/creatUser', async (req, res) => {
 // 更新用户信息
 router.put('/updateUser/:id', (req, res) => {
     let code = 200;
-    const { _id, status, desc } = req.body;
-    User.updateOne({ _id: req.params.id }, { status, desc })
-        .then((data) => {
+    const {  status, desc } = req.body;
+    User.updateOne({ id: req.params.id }, { status, desc })
+        .then(() => {
             returnRes(res, code, 'Success');
         })
         .catch((err) => {
@@ -87,8 +88,8 @@ router.put('/updateUser/:id', (req, res) => {
 // 重置密码
 router.put('/resetPassword/:id', (req, res) => {
     let code = 200;
-    User.updateOne({ _id: req.params.id }, { password: '123456' })
-        .then((data) => {
+    User.updateOne({ id: req.params.id }, { password: '123456' })
+        .then(() => {
             returnRes(res, code, 'Success');
         })
         .catch((err) => {
@@ -99,8 +100,8 @@ router.put('/resetPassword/:id', (req, res) => {
 // 删除用户
 router.delete('/deleteUser/:id', (req, res) => {
     let code = 200;
-    User.deleteOne({ _id: req.params.id })
-        .then((data) => {
+    User.deleteOne({ id: req.params.id })
+        .then(() => {
             returnRes(res, code, 'Success');
         })
         .catch((err) => {

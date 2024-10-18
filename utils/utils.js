@@ -21,11 +21,12 @@ const getModel = (name) => {
 const getSearch = (query) => {
     const search = {};
     const someQuery = ['userName', 'name', 'id'];
+    const pageParams = ['page','pageSize'];
     for(let key in query) {
         if(query[key]) {
             if(someQuery.includes(key)) {
                 search[key] = new RegExp(query[key], 'i');
-            } else {
+            } else if(!pageParams.includes(key)) {
                 search[key] = query[key]; 
             }
         }
@@ -38,8 +39,8 @@ const returnRes = (res, code, message, data, token) => {
         message,
     }
     if(data) {
-        resData.total = data.length;
-        resData.data = data;
+        resData.total = data.total;
+        resData.data = data.result;
     }
     if(token) {
         resData.token = token;
@@ -52,4 +53,11 @@ const handleDatabaseError = (res, err) => {
     returnRes(res, 500, '数据库错误');
 }
 
-module.exports = { getModel, getSearch, returnRes, handleDatabaseError, generateSecureToken }
+const getPage = (page=1, pageSize=10, result) => {
+    return {
+        result:result.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize),
+        total: result.length
+    }
+}
+
+module.exports = { getModel, getSearch, returnRes, handleDatabaseError, generateSecureToken, getPage }

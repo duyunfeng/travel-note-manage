@@ -1,5 +1,5 @@
 userId 3
-fooId 3
+foodId 11
 siteId 1
-articleId 0
+articleId 3
 logId 0

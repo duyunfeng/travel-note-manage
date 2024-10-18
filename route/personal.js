@@ -4,11 +4,10 @@ const { data } = require('../data/global');
 const router = express.Router();
 
 const Personal = getModel('personal');
-const User = getModel('user');
 router.get('/getPersonal', (req, res) => {
-    Personal.findOne({ _id: data.user._id })
+    const params = req.query;
+    Personal.findOne(params)
     .then(result=> {
-        console.log(result)
         if(!result) {
             Personal.create({
                 name: data.user.name,
@@ -19,29 +18,27 @@ router.get('/getPersonal', (req, res) => {
                 avatar: '',
                 desc: '',
                 _id: data.user._id
-            }).then(data=> {
-                returnRes(res, 200, 'Success', data)
+            }).then(result=> {
+                returnRes(res, 200, 'Success', {result:result})
             }).catch(err =>{
                 handleDatabaseError(res, err)
             })
         } else {
-            returnRes(res, 200, 'Success', result)
+            returnRes(res, 200, 'Success', {result:result})
         }
     })
     .catch((err) => {
-        console.log(err)
         handleDatabaseError(res, err);
     });
 })
 
 router.put('/updatePersonal', (req, res) => {
     const params = req.body;
-    Personal.updateOne({ _id: data.user._id }, params)
+    Personal.updateOne({ id: data.user.id }, params)
     .then(()=> {
         returnRes(res, 200, 'Success')
     })
     .catch((err) => {
-        console.log(err)
         handleDatabaseError(res, err);
     });
 })
